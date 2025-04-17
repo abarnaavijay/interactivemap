@@ -74,25 +74,23 @@ var map = L.map('map').setView([21.7679,78.8718],10)
 			   layer.bindPopup(`<strong>${feature.properties.NAME_1}</strong>`);
 		   }
        }
-       
-       const dummyPopulations = {};
-       const stateNames = [];
-
 	fetch("Indian_States.geojson")
   	.then(response => response.json())
   	.then(india => {
-    india.features.forEach(feature => {
-      const name = feature.properties.NAME_1;
-      if (!dummyPopulations[name]) {
-        dummyPopulations[name] = randomPopulation();
-        stateNames.push(name);
+	 const dummyPopulations = {};
+    	 const stateNames = [];
+         india.features.forEach(feature => {
+          const name = feature.properties.NAME_1;
+          if (!dummyPopulations[name]) {
+            dummyPopulations[name] = randomPopulation();
+            stateNames.push(name);
       }
     });
 
     let currentHighlight;
     function highlightFeature(layer) {
       if (currentHighlight) {
-        map.resetStyle(currentHighlight);
+         maplayer.resetStyle(currentHighlight);
       }
       layer.setStyle({
         weight: 3,
@@ -128,7 +126,7 @@ var map = L.map('map').setView([21.7679,78.8718],10)
       onEachFeature: function(feature, layer) {
         onEachState(feature, layer);
         layer.on('click', function () {
-          highlightFeature(layer);
+           layer.openPopup();;
           document.getElementById('state-name').textContent = feature.properties.NAME_1;
           document.getElementById('state-pop').textContent = dummyPopulations[feature.properties.NAME_1].toLocaleString();
         });
