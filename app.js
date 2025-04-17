@@ -1,11 +1,13 @@
 var map = L.map('map').setView([21.7679,78.8718],10)
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		  maxZoom: 19,
 		  attribution: '&copy; OpenStreetMap contributors'
 		}).addTo(map);
 		function randomPopulation() {
           return Math.floor(Math.random() * 50000000) + 1000000;
           }
+         const dummyPopulations = {};
+    	 const stateNames = [];
         function populateSidebar(names) {
 		  document.getElementById('total-states').textContent = names.length;
 
@@ -77,8 +79,6 @@ var map = L.map('map').setView([21.7679,78.8718],10)
 	fetch("Indian_States.geojson")
   	.then(response => response.json())
   	.then(india => {
-	 const dummyPopulations = {};
-    	 const stateNames = [];
          india.features.forEach(feature => {
           const name = feature.properties.NAME_1;
           if (!dummyPopulations[name]) {
