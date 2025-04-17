@@ -78,12 +78,9 @@ var map = L.map('map').setView([21.7679,78.8718],10)
        const dummyPopulations = {};
        const stateNames = [];
 
-fetch("Indian_States.geojson")
-  .then(response => response.json())
-  .then(india => {
-    const dummyPopulations = {};
-    const stateNames = [];
-
+	fetch("Indian_States.geojson")
+  	.then(response => response.json())
+  	.then(india => {
     india.features.forEach(feature => {
       const name = feature.properties.NAME_1;
       if (!dummyPopulations[name]) {
