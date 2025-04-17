@@ -78,51 +78,69 @@ var map = L.map('map').setView([21.7679,78.8718],10)
        const dummyPopulations = {};
        const stateNames = [];
 
-       india.features.forEach(feature => {
-         const name = feature.properties.NAME_1;
-         if (!dummyPopulations[name]) {
-           dummyPopulations[name] = randomPopulation();
-           stateNames.push(name);
-          }
-         });
-	   let currentHighlight; // to store the highlighted layer
+fetch("Indian_States.geojson")
+  .then(response => response.json())
+  .then(india => {
+    const dummyPopulations = {};
+    const stateNames = [];
 
-       function highlightFeature(layer) {
-         if (currentHighlight) {
-           map.resetStyle(currentHighlight); // remove highlight from previous
-         }
-         layer.setStyle({
-           weight: 3,
-           color: 'blue',
-           fillOpacity: 0.9
-          });
-        currentHighlight = layer;
+    india.features.forEach(feature => {
+      const name = feature.properties.NAME_1;
+      if (!dummyPopulations[name]) {
+        dummyPopulations[name] = randomPopulation();
+        stateNames.push(name);
+      }
+    });
+
+    let currentHighlight;
+    function highlightFeature(layer) {
+      if (currentHighlight) {
+        map.resetStyle(currentHighlight);
+      }
+      layer.setStyle({
+        weight: 3,
+        color: 'blue',
+        fillOpacity: 0.9
+      });
+      currentHighlight = layer;
+    }
+
+    function searchState() {
+      const query = document.getElementById('stateSearch').value.trim().toLowerCase();
+      if (!query) return;
+      let found = false;
+
+      maplayer.eachLayer(layer => {
+        const stateName = layer.feature.properties.NAME_1;
+        if (stateName.toLowerCase() === query) {
+          highlightFeature(layer);
+          map.fitBounds(layer.getBounds());
+          document.getElementById('state-name').textContent = stateName;
+          document.getElementById('state-pop').textContent = dummyPopulations[stateName].toLocaleString();
+          found = true;
         }
-       function searchState() {
-         const query = document.getElementById('stateSearch').value.trim().toLowerCase();
-         if (!query) return;
-         let found = false;
+      });
 
-         maplayer.eachLayer(layer => {
-          const stateName = layer.feature.properties.NAME_1;
-          if (stateName.toLowerCase() === query) {
-            highlightFeature(layer);
-      // Zoom to state
-            map.fitBounds(layer.getBounds());
-      // Show in sidebar
-            document.getElementById('state-name').textContent = stateName;
-            document.getElementById('state-pop').textContent = dummyPopulations[stateName].toLocaleString();
-            found = true;
-          }
+      if (!found) {
+        alert("State not found!");
+      }
+    }
+
+    const maplayer = L.geoJson(india, {
+      style: indiastyle,
+      onEachFeature: function(feature, layer) {
+        onEachState(feature, layer);
+        layer.on('click', function () {
+          highlightFeature(layer);
+          document.getElementById('state-name').textContent = feature.properties.NAME_1;
+          document.getElementById('state-pop').textContent = dummyPopulations[feature.properties.NAME_1].toLocaleString();
         });
-        if (!found) {
-         alert("State not found!");
-        }
-       }
-       const maplayer = L.geoJson(india, {
-         style: indiastyle,
-         onEachFeature: onEachState
-       }).addTo(map);
+      }
+    }).addTo(map);
 
-       map.fitBounds(maplayer.getBounds());
-       populateSidebar(stateNames)
+    map.fitBounds(maplayer.getBounds());
+    populateSidebar(stateNames);
+
+    // Attach search function to global scope
+    window.searchState = searchState;
+  });
